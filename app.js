@@ -59,6 +59,18 @@ var budgetController = (function() {
             return newItem;
         },
 
+        deleteItem: function(type, id) {
+            var ids = data.allItems[type].map(function(current){
+                return current.id;
+            });
+
+            index = ids.indexOf(id);
+
+            if (index !== -1) {
+                data.allItems[type].splice(index, 1);
+            }
+        },
+
         calculateBudget: function() {
             // calculate total income and expenses
             calculateTotal('exp');
@@ -106,6 +118,7 @@ var uiController = (function () {
         incomeLabel: '.budget__income--value',
         expenseLabel: '.budget__expenses--value',
         percentageLabel: '.budget__expenses--percentage',
+        container: '.container',
     };
 
     return {
@@ -123,7 +136,7 @@ var uiController = (function () {
             var html, newHtml, element;
             if (type === 'inc') {
                 element = DOMStrings.incomeContainer;
-                html = '<div class="item clearfix" id="income-%id%">'
+                html = '<div class="item clearfix" id="inc-%id%">'
                 + '<div class="item__description">%description%</div>'
                 + '<div class="right clearfix">'
                 + '<div class="item__value">%value%</div>'
@@ -134,7 +147,7 @@ var uiController = (function () {
                 + '</div>'
             } else if (type === 'exp') {
                 element = DOMStrings.expenseContainer;
-                html = '<div class="item clearfix" id="expense-0">'
+                html = '<div class="item clearfix" id="exp-%id%">'
                 + '<div class="item__description">%description%</div>'
                 + '<div class="right clearfix">'
                 + '<div class="item__value">%value%</div>'
@@ -146,7 +159,7 @@ var uiController = (function () {
                 + '</div>'
             }
             // Replace the placeholder
-            newHtml = html.replace('%id', obj.id);
+            newHtml = html.replace('%id%', obj.id);
             newHtml = newHtml.replace('%description%', obj.desc);
             newHtml = newHtml.replace('%value%', obj.val);
 
@@ -201,6 +214,8 @@ var controller = (function(budgtCtrl, uiCtrl) {
                 ctrlAddItem();
             }
         });
+
+        document.querySelector(dom.container).addEventListener('click', ctrlDeleteItem);
     };
 
     var updateBudget = function() {
@@ -233,6 +248,25 @@ var controller = (function(budgtCtrl, uiCtrl) {
             updateBudget();
         }
 
+    };
+
+    var ctrlDeleteItem = function(event) {
+        var itemId, splitId, type, id;
+        itemId = event.target.parentNode.parentNode.parentNode.parentNode.id;
+
+        if (itemId) {
+            splitId = itemId.split('-');
+            type = splitId[0];
+            id = parseInt(splitId[1]);
+
+            // Delete the item from the data structure
+            budgtCtrl.deleteItem(type, id);
+
+            // Delete the item from the UI
+
+
+            // Update and show the new budget
+        }
     };
 
     return {
